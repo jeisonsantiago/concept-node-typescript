@@ -15,15 +15,26 @@ interface CreateTransaction {
 
 class TransactionsRepository {
   private transactions: Transaction[];
-  private balance: Balance;
+  //private balance: Balance;
 
   constructor() {
     this.transactions = [];
-    this.balance = { income: 0, outcome: 0, total: 0 };
+    //this.balance = { income: 0, outcome: 0, total: 0 };
   }
 
+
   public getBalance(): Balance {
-    return this.balance;
+    
+    const balance: Balance = { income: 0, outcome: 0, total: 0 };
+
+    this.transactions.forEach((transaction)=>{
+      balance.income += (transaction.type === 'income')?transaction.value:0;
+      balance.outcome += (transaction.type === 'outcome')?transaction.value:0;
+      balance.total = (balance.income - balance.outcome);
+    })
+
+    return balance;
+
   }
 
   public all(): Transaction[] {
@@ -33,14 +44,6 @@ class TransactionsRepository {
 
   public create({ title, value, type }: CreateTransaction): Transaction {
     const transaction = new Transaction({ title: title, value: value, type: type });
-
-    if (type == 'outcome') {
-      this.balance.outcome += value;
-      this.balance.total -= value;
-    } else {
-      this.balance.income += value;
-      this.balance.total += value;
-    }
 
     this.transactions.push(transaction);
 
